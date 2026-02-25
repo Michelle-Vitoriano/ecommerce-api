@@ -7,9 +7,9 @@ const user = process.env.DB_USER;
 const password = process.env.DB_PASS;
 
 const database = new Sequelize(dataBase, user, password, {
-  host: 'localhost',
+  host: process.env.DB_HOST,
   dialect: 'mysql',
-  port: 3306
+  port: Number(process.env.DB_PORT)
 });
 
 module.exports = database;
