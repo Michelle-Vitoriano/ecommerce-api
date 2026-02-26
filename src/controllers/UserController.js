@@ -1,6 +1,3 @@
-const { Where } = require('sequelize/lib/utils');
-const UserModel = require('../models/UserModel');
-const MD5 = require('crypto-js/md5');
 const UserService = require('../services/UserService');
 
 class UserController{

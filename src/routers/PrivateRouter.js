@@ -1,11 +1,13 @@
 const express = require('express');
 const UserRouter = require('./UserRouter');
 const AuthMiddleware = require('../middleware/AuthMiddleware');
+const CategoryRouter = require('./CategoryRouter');
 
 
-const RotasPrivadas = express.Router();
+const PrivateRouter = express.Router();
 
-RotasPrivadas.use(AuthMiddleware);
-RotasPrivadas.use(UserRouter);
+PrivateRouter.use(AuthMiddleware);
+PrivateRouter.use(UserRouter);
+PrivateRouter.use(CategoryRouter);
 
-module.exports = RotasPrivadas;
+module.exports = PrivateRouter;
