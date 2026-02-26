@@ -80,7 +80,6 @@ class UserController{
         const body = request.body;
         console.log(body);
         const password = MD5(body.password).toString();
-        console.log(body);
         body.password = password;
         const user = await UserModel.create(body);
         

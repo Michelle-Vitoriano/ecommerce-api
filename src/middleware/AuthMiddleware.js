@@ -11,7 +11,8 @@ module.exports = (request, response, next) => {
         return response.status(400).json({ error: "Token não enviado" });
     }
         
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(' ')[0];
+    
 
     try{
         jwt.verify(token, key);

@@ -9,7 +9,7 @@ class AuthController {
         try {
             const user = await AuthService.login(email, password);
 
-            const token =  jwt.sing(
+            const token =  jwt.sign(
                 { id: user.id, username: user.username},
                 key,
                 { expiresIn: '1h' }
