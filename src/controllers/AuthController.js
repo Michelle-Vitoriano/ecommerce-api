@@ -17,19 +17,6 @@ class AuthController {
         return null;
         
     }
-
-    // // Registrar Novo Usuário
-    // register = async (req, res) => {
-    //     const { firtname, surname, email, password} = req.body;
-    //     // Criptografando a senha antes de salvar
-    //     const hashedPassword = await bcrypt.hash(password, 10);
-    //     try {
-    //         const user = await UserModel.create({ email, password: hashedPassword, email });
-    //         res.json({ user, token: generateToken(user) });
-    //     } catch (error) { 
-    //         res.json({ message: "Ocorreu um erro ao registrar o Usuário" })
-    //     }
-    // };
 }
 
 module.exports = AuthController;
