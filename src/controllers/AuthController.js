@@ -1,21 +1,23 @@
-const UserModel = require('../models/UserModel');
-const MD5 = require('crypto-js/md5');
-class AuthController {
-    async login(email, password) {
-        
-        const dados = await UserModel.findAll({
-            where: {
-                email: email,
-                password: MD5(password).toString()
-            }
-        })
+const jwt = require('jsonwebtoken');
+const AuthService = require('../services/AuthService');
 
-        if(dados.length){
-            return dados[0];
+const key = process.env.APP_KEY;
+
+class AuthController {
+    static async login(request, response) {
+        const { email, password } = request.body;
+        try {
+            const user = await AuthService.login(email, password);
+
+            const token =  jwt.sing(
+                { id: user.id, username: user.username},
+                key,
+                { expiresIn: '1h' }
+            );
+            return response.status(200).json({ token: token});
+        } catch(error) {
+            return response.status(400).json({ error: error.message });
         }
-        
-        return null;
-        
     }
 }
 
