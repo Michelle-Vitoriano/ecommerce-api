@@ -1,12 +1,12 @@
-const { Where } = require('sequelize/lib/utils');
-const CategoryModel = require('../models/CategoryModel');
-const MD5 = require('crypto-js/md5');
 const ProductModel = require('../models/ProductModel');
 const ProductCategoryModel = require('../models/ProductCategoryModel');
+const CategoryModel = require('../models/CategoryModel');
+const ProductImageModel = require('../models/ProductImageModel');
+const OptionsProductModel = require('../models/OptionsProductModel');
 
-class UserController{
+class ProductController{
     constructor() {
-        CategoryModel.associate({ProductModel, ProductCategoryModel});
+        ProductModel.associate({ProductImageModel, OptionsProductModel, ProductCategoryModel});
     }
     async list(request, response){
         try {
@@ -45,7 +45,7 @@ class UserController{
                 options.offset = (page -1) * limit;
             };
 
-            const { count, rows } = await CategoryModel.findAndCountAll(options);
+            const { count, rows } = await ProductModel.findAndCountAll(options);
 
             return response.status(200).json({
                 data: rows,
@@ -61,7 +61,7 @@ class UserController{
 
     async queryById(request, response){
         try {
-            const category = await CategoryModel.findByPk(request.params.id, {
+            const category = await ProductModel.findByPk(request.params.id, {
                 attributes: ["id", "name", "slug", "use_in_menu"]
             });
 
@@ -75,20 +75,62 @@ class UserController{
     }
 
     async create(request, response){
-    try {
-        const category = request.body;
-        CategoryModel.create(category);
-        return response.status(201).json({
-            mensagem: 'Category cadastrado com sucesso!'
-        });
-    } catch(error) {
-        return response.status(400).json({ error: error.message });
+        const t = await ProductModel.sequelize.transaction();
+
+        try {
+            const {images, category_ids, options,  ...body} = request.body;
+
+            if(!category_ids || !Array.isArray(category_ids)) {
+                await t.rollback();
+                return response.status(400).json({ error: "category_id recisa ser uma array"});
+            }
+            const categories = await CategoryModel.findAll({
+                where: {id: category_ids },
+                transaction: t
+            });
+            if(categories.length !== category_ids.length) {
+                await t.rollback();
+                return response.status(400).json({ error: "Uma ou mais categorias não existem"})
+            }
+
+
+            const product = await ProductModel.create(body, { transaction: t });
+
+            if(category_ids?.length) {
+                await product.setCategories(category_ids, { transaction: t });
+            }
+            if(images?.length) {
+                const imagesData = images.map(img => ({
+                    product_id: product.id,
+                    enable: true,
+                    path: img.content
+                }));
+                
+                await ProductImageModel.bulkCreate(imagesData, { transaction: t });
+            }
+            if(options?.length) {
+                const optionsData = options.map(opt => ({
+                    ...opt,
+                    product_id: product.id
+                }));
+
+                await OptionsProductModel.bulkCreate(optionsData, { transaction: t });
+            }
+             
+            await t.commit();
+
+            return response.status(201).json({
+                mensagem: 'Product cadastrado com sucesso!'
+            });
+        } catch(error) {
+            await t.rollback();
+            return response.status(400).json({ error: error.message });
+        }
     }
-}
 
     async update(request, response) {
         try {
-            const category = await CategoryModel.findByPk(request.params.id);
+            const category = await ProductModel.findByPk(request.params.id);
             if(!category) { return response.status(404).json({ error: "Category não encontrada"})};
 
             const {name, slug, use_in_menu} = request.body;
@@ -110,7 +152,7 @@ class UserController{
     
     async delete(request, response) {
         try {
-            const category = await CategoryModel.findByPk(request.params.id);
+            const category = await ProductModel.findByPk(request.params.id);
             if(!category) { return response.status(404).json({ error: "Category não encontrada"}) };
             await category.destroy();
             return response.status(204).send();
@@ -121,4 +163,4 @@ class UserController{
 }
 
 
-module.exports = UserController;
+module.exports = ProductController;

@@ -3,10 +3,15 @@ const database = require('../config/database');
 const CategoryModel = require('./CategoryModel');
 
 class ProductModel extends Model {
-  static associate({ProductModel, ProductImageModel, OptionsProductModel, ProductCategoryModel}){
-      ProductModel.hasMany(ProductImageModel, { foreignKey: 'product_id' });
-      ProductModel.hasMany(OptionsProductModel, { foreignKey: 'product_id' });
-      ProductModel.belongsToMany(CategoryModel, { through: ProductCategoryModel, foreignKey: 'product_id', otherKey: 'category_id' });
+  static associate({ProductImageModel, OptionsProductModel, ProductCategoryModel}){
+      ProductModel.hasMany(ProductImageModel, { foreignKey: 'product_id', onDelete: 'CASCADE' });
+      ProductModel.hasMany(OptionsProductModel, { foreignKey: 'product_id', onDelete: 'CASCADE' });
+      ProductModel.belongsToMany(CategoryModel, { 
+        through: ProductCategoryModel,
+        as: 'categories', 
+        foreignKey: 'product_id', 
+        otherKey: 'category_id' 
+      });
   }
 }
 

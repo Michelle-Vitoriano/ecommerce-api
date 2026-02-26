@@ -11,7 +11,7 @@ const ProductCategoryModel = require('./src/models/ProductCategoryModel');
 
 async function syncDatabase() {
   try {
-    await database.sync({ force: true });
+    await database.sync({ alter: true  });
     console.log('Banco de dados resetado e sincronizado!');
   } catch (error) {
     console.error('Falha na sincronização:', error);
