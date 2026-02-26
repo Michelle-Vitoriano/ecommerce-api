@@ -7,7 +7,7 @@ class AuthService {
 
         const hashedPassword = MD5(password).toString();
 
-        const user = await UserModel.findOne({
+        const user = await UserModel.findAll({
             where: {
                 email,
                 password: hashedPassword
